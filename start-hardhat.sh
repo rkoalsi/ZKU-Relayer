@@ -1,0 +1,1 @@
+cd chain && yarn hardhat node
