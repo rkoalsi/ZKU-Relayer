@@ -8,7 +8,8 @@ import {
   LinkOverlay,
 } from '@chakra-ui/react';
 
-const siteTitle = 'FirstDAPP';
+const siteTitle = 'ZKU Relayer';
+
 export default function Header() {
   return (
     <Flex
