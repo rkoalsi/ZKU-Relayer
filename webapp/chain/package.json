@@ -4,7 +4,12 @@
   "main": "index.js",
   "author": "rkoalsi",
   "license": "MIT",
+  "scripts": {
+    "dev": "yarn hardhat node",
+    "test": "npx hardhat test"
+  },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.6.0",
     "hardhat": "^2.9.9"
   },
   "devDependencies": {
@@ -23,6 +28,7 @@
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
     "hardhat-gas-reporter": "^1.0.4",
+    "openzeppelin-test-helpers": "^0.5.1",
     "prettier": "^2.3.2",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.6",

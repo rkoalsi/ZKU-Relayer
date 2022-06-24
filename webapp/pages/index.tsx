@@ -9,22 +9,27 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  useToast,
 } from '@chakra-ui/react';
-import { TITLE } from '../constants';
+import { TITLE, CONTRACT_ADDRESS } from '../constants';
+import Payer from '../chain/artifacts/contracts/Payer.sol/Payer.json';
 
 declare let window: any;
 
 const Home: NextPage = () => {
+  const toast = useToast();
   const [balance, setBalance] = useState<string | undefined>();
   const [currentAccount, setCurrentAccount] = useState<string | undefined>();
   const [chainId, setChainId] = useState<number | undefined>();
   const [networkName, setNetworkName] = useState<string | undefined>();
   const [amount, setAmount] = useState<number | undefined>();
   const [receiver, setReceiver] = useState<string | undefined>();
+
   useEffect(() => {
     if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return;
     //client side code
     if (!window.ethereum) return;
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     provider.getBalance(currentAccount).then((result) => {
@@ -65,9 +70,40 @@ const Home: NextPage = () => {
       setAmount(parseFloat(balance));
     }
   };
-  const onClickRelay = () => {
-    if (receiver && ethers.utils.isAddress(receiver))
-      console.log(amount, receiver);
+  const onClickRelay = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    if (receiver && ethers.utils.isAddress(receiver) && amount && amount > 0) {
+      const signer = provider.getSigner();
+      const payerContract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        Payer.abi,
+        signer
+      );
+      // const tx = await signer.sendTransaction({
+      //   to: receiver,
+      //   value: ethers.utils.parseEther(amount.toString()),
+      // });
+      const tx = await payerContract.transfer(
+        receiver,
+        ethers.utils.parseEther(amount.toString())
+      );
+      console.log(tx);
+      toast({
+        title: 'Relaying Transaction',
+        description: `We are sending ${amount} to ${receiver}, Transaction Hash: ${tx.hash}`,
+        status: 'success',
+        duration: 9000,
+        isClosable: true,
+      });
+    } else {
+      toast({
+        title: 'Transaction Not Attempted',
+        description: `Please enter a valid Ethereum Address`,
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+      });
+    }
   };
   return (
     <>
@@ -112,7 +148,6 @@ const Home: NextPage = () => {
               <Box pb={4}>
                 <Text mb='8px'>To: </Text>
                 <Input
-                  pr='4.5rem'
                   type={'text'}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setReceiver(e.target.value);
@@ -123,9 +158,8 @@ const Home: NextPage = () => {
                 <Text mb='8px'>Amount: </Text>
                 <InputGroup size='md'>
                   <Input
-                    pr='4.5rem'
                     type={'number'}
-                    value={amount ? amount : ''}
+                    value={amount}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setAmount(parseFloat(e.target.value));
                     }}

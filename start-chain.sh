@@ -1,1 +1,1 @@
-cd chain && yarn hardhat node
+cd webapp/chain && dev
